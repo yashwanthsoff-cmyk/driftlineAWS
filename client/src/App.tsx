@@ -605,7 +605,7 @@ function LandingPage() {
   }, [processFrames.length]);
   const live = processFrames[processFrame];
   return <div className="landing-page">
-    <header className="landing-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><nav><a href="#why-driftline">Why Driftline</a><a href="#how-it-works">How it works</a><Link href="/console">Console</Link></nav><div className="landing-header-actions"><Link href="/settings" className="landing-signin">Sign in</Link><Link href="/console" className="landing-open-console">Open console <ArrowUpRight size={15} /></Link></div></header>
+    <header className="landing-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><nav><a href="#why-driftline">Why Driftline</a><a href="#how-it-works">How it works</a><Link href="/console">Console</Link></nav><div className="landing-header-actions"><Link href="/signin" className="landing-signin">Sign in</Link><Link href="/console" className="landing-open-console">Open console <ArrowUpRight size={15} /></Link></div></header>
     <main className="landing-hero" id="landing-top">
       <div className="landing-orbit landing-orbit-outer" /><div className="landing-orbit landing-orbit-inner" />
       <div className="landing-card-orbit">{floatingCards.map((card) => { const Icon = card.icon; return <div key={card.label} className={cn("landing-card", card.className, `landing-card-${card.tone}`)}><div className="landing-card-label">{card.label}<span><Icon size={13} /></span></div><strong>{card.title}</strong><small>{card.meta}</small></div>; })}</div>
@@ -635,6 +635,21 @@ function GenericErrorFallback() {
   return <div className="crash-screen"><div className="crash-icon"><AlertTriangle size={25} /></div><div className="eyebrow-row">APPLICATION ERROR</div><h1>Something went wrong</h1><p>The application hit an unexpected error. Refresh the page to try again.</p><button className="button button-primary" onClick={() => window.location.reload()}><RefreshCw size={15} /> Refresh application</button></div>;
 }
 
+function SignInPage({ onSignedIn }: { onSignedIn: () => void }) {
+  const [, setLocation] = useLocation();
+  const [email, setEmail] = useState("operator@driftline.dev");
+  const [password, setPassword] = useState("driftline-demo");
+  const nextPath = new URLSearchParams(window.location.search).get("next") || "/console";
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!email || !password) return;
+    window.sessionStorage.setItem("driftline-signed-in", "true");
+    onSignedIn();
+    setLocation(nextPath);
+  };
+  return <div className="auth-page"><header className="auth-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><span className="auth-header-note">DECISION INTELLIGENCE</span></header><main className="auth-main"><div className="auth-visual"><div className="auth-orbit auth-orbit-one" /><div className="auth-orbit auth-orbit-two" /><div className="auth-visual-core"><GitBranch size={28} /></div><span className="auth-float auth-float-one"><Activity size={15} /> signal feed</span><span className="auth-float auth-float-two"><ShieldCheck size={15} /> evidence ready</span><span className="auth-float auth-float-three"><CheckCircle2 size={15} /> accountable</span></div><section className="auth-card"><div className="landing-kicker"><span className="landing-kicker-dot" /> SECURE OPERATIONS ACCESS</div><h1>Welcome back.</h1><p>Sign in to open your Driftline decision intelligence console.</p><form onSubmit={submit}><label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label><button className="landing-primary-cta auth-submit" type="submit">Continue to console <ArrowUpRight size={16} /></button></form><div className="auth-demo-note"><LockKeyhole size={13} /><span>Demo access is prefilled. No external account is required.</span></div><Link href="/" className="auth-back"><ArrowLeft size={14} /> Back to Driftline home</Link></section></main></div>;
+}
+
 function Router({ state, setState, setDecision, setOutcome }: { state: AppState; setState: (updater: (current: AppState) => AppState) => void; setDecision: (id: string, decision: Decision) => void; setOutcome: (id: string, outcome: Outcome) => void }) {
   const [location] = useLocation();
   if (location === "/console") return <FeedPage state={state} />;
@@ -647,7 +662,10 @@ function Router({ state, setState, setDecision, setOutcome }: { state: AppState;
 function App() {
   const { state, setState, setDecision, setOutcome } = useDriftlineState();
   const [location] = useLocation();
-  return <ErrorBoundary>{location === "/" ? <LandingPage /> : <Shell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></Shell>}<Toaster theme="dark" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
+  const [signedIn, setSignedIn] = useState(() => window.sessionStorage.getItem("driftline-signed-in") === "true");
+  const needsAuth = location !== "/" && location !== "/signin";
+  const content = location === "/" ? <LandingPage /> : location === "/signin" || (!signedIn && needsAuth) ? <SignInPage onSignedIn={() => setSignedIn(true)} /> : <Shell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></Shell>;
+  return <ErrorBoundary>{content}<Toaster theme="dark" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
 }
 
 export default App;
