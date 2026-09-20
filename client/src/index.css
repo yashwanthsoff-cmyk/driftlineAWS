@@ -581,3 +581,16 @@ code, pre, .resource-name, .event-id, .pattern-key, .json-header, .source-card, 
   .landing-card-audit { right: 1%; bottom: -18px; }
   .landing-capabilities { grid-template-columns: 1fr; gap: 22px; padding: 62px 22px; }
 }
+
+/* Circular orbit motion for the landing-page governance cards. */
+.landing-card-orbit { position: absolute; inset: 0; transform-origin: 50% 51%; animation: landing-orbit-loop 30s linear infinite; }
+.landing-card-orbit .landing-card { animation: none; transform: rotate(var(--tilt)); }
+.landing-card-orbit .landing-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
+@keyframes landing-orbit-loop { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .landing-card-orbit { animation: none; } }
+@media (max-width: 760px) { .landing-card-orbit { transform-origin: 50% 48%; animation-duration: 34s; } }
+
+@property --orbit-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.landing-card-orbit { --orbit-angle: 0deg; transform: rotate(var(--orbit-angle)); animation: landing-orbit-loop 30s linear infinite; }
+.landing-card-orbit .landing-card { transform: rotate(calc(var(--orbit-angle) * -1)) rotate(var(--tilt)); }
+@keyframes landing-orbit-loop { from { --orbit-angle: 0deg; } to { --orbit-angle: 360deg; } }

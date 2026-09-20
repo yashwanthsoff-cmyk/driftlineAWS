@@ -585,7 +585,7 @@ function LandingPage() {
     <header className="landing-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><nav><a href="#why-driftline">Why Driftline</a><a href="#how-it-works">How it works</a><Link href="/console">Console</Link></nav><div className="landing-header-actions"><Link href="/settings" className="landing-signin">Sign in</Link><Link href="/console" className="landing-open-console">Open console <ArrowUpRight size={15} /></Link></div></header>
     <main className="landing-hero" id="why-driftline">
       <div className="landing-orbit landing-orbit-outer" /><div className="landing-orbit landing-orbit-inner" />
-      {floatingCards.map((card) => { const Icon = card.icon; return <div key={card.label} className={cn("landing-card", card.className, `landing-card-${card.tone}`)}><div className="landing-card-label">{card.label}<span><Icon size={13} /></span></div><strong>{card.title}</strong><small>{card.meta}</small></div>; })}
+      <div className="landing-card-orbit">{floatingCards.map((card) => { const Icon = card.icon; return <div key={card.label} className={cn("landing-card", card.className, `landing-card-${card.tone}`)}><div className="landing-card-label">{card.label}<span><Icon size={13} /></span></div><strong>{card.title}</strong><small>{card.meta}</small></div>; })}</div>
       <div className="landing-kicker"><span className="landing-kicker-dot" /> AWS CONFIGURATION DRIFT GOVERNANCE</div>
       <h1>Infrastructure<br />changes.<br /><em>Clearly</em><br /><em>accounted</em><br /><em>for.</em></h1>
       <p className="landing-deck">Driftline connects what changed with who changed it, why it matters, and what your team should do next.</p>
