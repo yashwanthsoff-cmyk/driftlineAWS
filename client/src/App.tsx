@@ -402,6 +402,41 @@ function MoreHorizontalIcon() {
   return <span className="more-icon">•••</span>;
 }
 
+function LightShell({ children, state, currentPath }: { children: ReactNode; state: AppState; currentPath: string }) {
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuGroups: Record<string, Array<{ label: string; detail?: string; href: string }>> = {
+    "What we do": [
+      { label: "Drift feed", detail: "Scan live configuration change signals", href: "/" },
+      { label: "Risk detail", detail: "Turn evidence into one decision", href: "/events/evt-7f3c1a" },
+      { label: "Historical memory", detail: "Learn from recurring drift patterns", href: "/events/evt-7f3c1a" },
+      { label: "Audit evidence", detail: "Export every decision snapshot", href: "/audit" },
+    ],
+    "Who we serve": [
+      { label: "Platform teams", detail: "Keep deployment context in one place", href: "/" },
+      { label: "Security engineering", detail: "Surface the drift that matters", href: "/events/evt-7f3c1a" },
+      { label: "Compliance", detail: "Evidence-ready decisions by default", href: "/audit" },
+      { label: "SRE & operations", detail: "Graceful fallbacks when sources fail", href: "/settings" },
+    ],
+    "About us": [
+      { label: "How it works", detail: "Correlation, memory, and explainability", href: "/" },
+      { label: "Replay mode", detail: "Explore the product with safe fixtures", href: "/settings" },
+      { label: "System settings", detail: "Tune the local control plane", href: "/settings" },
+    ],
+  };
+  return <div className={cn("light-shell", mobileOpen && "light-mobile-open")}>
+    <header className="ls-header">
+      <Link className="ls-brand" href="/" onClick={() => { setOpenMenu(null); setMobileOpen(false); }}><span className="ls-brand-mark"><GitBranch size={15} strokeWidth={2.5} /></span><span>driftline</span></Link>
+      <nav className="ls-nav" aria-label="Primary">{Object.keys(menuGroups).map((label) => <button key={label} className={cn("ls-nav-button", openMenu === label && "ls-nav-button-open")} onClick={() => setOpenMenu(openMenu === label ? null : label)}>{label}<ChevronRight size={12} className={cn(openMenu === label && "ls-nav-chevron-open")} /></button>)}</nav>
+      <div className="ls-actions"><span className="ls-replay"><span className="ls-replay-dot" /> replay mode</span><a href="#" onClick={(event) => { event.preventDefault(); toast.info("Documentation is coming next."); }}>View docs</a><Link href="/settings">Log in</Link><Link href="/settings">Contact</Link><button className="ls-menu-trigger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu"><Menu size={18} /></button></div>
+      {openMenu && <div className="ls-mega-menu"><div className="ls-mega-intro"><span className="ls-menu-index">0{Object.keys(menuGroups).indexOf(openMenu) + 1}</span><h2>{openMenu}</h2><p>One explainable operating layer for teams moving changes through cloud infrastructure.</p></div><div className="ls-mega-links">{menuGroups[openMenu].map((item, index) => <Link key={item.label} href={item.href} className="ls-mega-link" onClick={() => setOpenMenu(null)}><span className="ls-mega-link-number">0{index + 1}</span><span><strong>{item.label}</strong><small>{item.detail}</small></span><ArrowUpRight size={15} /></Link>)}</div></div>}
+    </header>
+    {mobileOpen && <div className="ls-mobile-menu"><div className="ls-mobile-menu-top"><span>menu</span><button onClick={() => setMobileOpen(false)}><X size={18} /></button></div>{Object.entries(menuGroups).map(([label, items]) => <div key={label} className="ls-mobile-group"><div className="ls-menu-index">0{Object.keys(menuGroups).indexOf(label) + 1}</div><strong>{label}</strong>{items.slice(0, 3).map((item) => <Link key={item.label} href={item.href} onClick={() => setMobileOpen(false)}>{item.label}<ArrowUpRight size={14} /></Link>)}</div>)}</div>}
+    <main className="content-area ls-content">{children}</main>
+    <footer className="ls-footer"><div className="ls-footer-brand"><span className="ls-brand-mark"><GitBranch size={15} strokeWidth={2.5} /></span><span>driftline</span></div><div className="ls-footer-note">Configuration drift, correlated into one explainable deployment decision.</div><div className="ls-footer-meta">replay mode · session memory · ap-south-1</div></footer>
+  </div>;
+}
+
 function Topbar({ currentPath, onMobileMenu }: { currentPath: string; onMobileMenu: () => void }) {
   const label = currentPath === "/" ? "Drift Feed" : currentPath.startsWith("/events/") ? "Risk Detail" : currentPath === "/audit" ? "Audit Log" : "Settings";
   return <header className="topbar">
@@ -556,7 +591,7 @@ function Router({ state, setState, setDecision, setOutcome }: { state: AppState;
 function App() {
   const { state, setState, setDecision, setOutcome } = useDriftlineState();
   const [location] = useLocation();
-  return <ErrorBoundary><Shell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></Shell><Toaster theme="dark" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
+  return <ErrorBoundary><LightShell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></LightShell><Toaster theme="light" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
 }
 
 export default App;
