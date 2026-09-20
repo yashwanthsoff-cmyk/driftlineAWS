@@ -429,7 +429,7 @@ function Topbar({ currentPath, onMobileMenu }: { currentPath: string; onMobileMe
 function Shell({ children, state, currentPath }: { children: ReactNode; state: AppState; currentPath: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  return <div className={cn("app-shell", mobileOpen && "mobile-nav-open")}>
+  return <div className={cn("app-shell unified-console", mobileOpen && "mobile-nav-open")}>
     <Sidebar currentPath={currentPath} failureMode={state.failureMode} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} onToggleMenu={() => setMobileOpen((value) => !value)} />
     <div className="app-main"><Topbar currentPath={currentPath} onMobileMenu={() => setMobileOpen(true)} /><main className="content-area">{children}</main></div>
     {mobileOpen && <button className="mobile-overlay" onClick={() => setMobileOpen(false)} aria-label="Close navigation" />}
