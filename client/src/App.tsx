@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -27,6 +27,8 @@ import {
   LayoutDashboard,
   LockKeyhole,
   Menu,
+  PanelLeft,
+  PanelLeftClose,
   RefreshCw,
   Search,
   Server,
@@ -40,6 +42,7 @@ import {
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { Link, useLocation } from "wouter";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // -----------------------------------------------------------------------------
@@ -204,6 +207,17 @@ const seedAudits: AuditLog[] = [
   },
 ];
 
+const seedSignalSeries = [
+  { time: "09:00", block: 2, review: 4, approve: 8 },
+  { time: "10:00", block: 3, review: 5, approve: 9 },
+  { time: "11:00", block: 2, review: 7, approve: 8 },
+  { time: "12:00", block: 4, review: 6, approve: 10 },
+  { time: "13:00", block: 5, review: 8, approve: 11 },
+  { time: "14:00", block: 4, review: 7, approve: 13 },
+  { time: "15:00", block: 6, review: 9, approve: 12 },
+  { time: "16:00", block: 5, review: 10, approve: 15 },
+];
+
 const riskMeta: Record<RiskLevel, { label: string; icon: typeof ShieldAlert; className: string; eyebrow: string }> = {
   block: { label: "Block", icon: XCircle, className: "status-block", eyebrow: "HIGH RISK" },
   review: { label: "Review", icon: AlertTriangle, className: "status-review", eyebrow: "MEDIUM-HIGH" },
@@ -359,16 +373,17 @@ function RiskIcon({ risk }: { risk: RiskLevel }) {
   return <span className={cn("risk-icon", riskMeta[risk].className)}><Icon size={18} /></span>;
 }
 
-function Sidebar({ currentPath, failureMode, onToggleMenu }: { currentPath: string; failureMode: boolean; onToggleMenu: () => void }) {
+function Sidebar({ currentPath, failureMode, collapsed, onToggleCollapse, onToggleMenu }: { currentPath: string; failureMode: boolean; collapsed: boolean; onToggleCollapse: () => void; onToggleMenu: () => void }) {
   const items = [
     { href: "/", label: "Drift Feed", icon: Activity, count: 3 },
     { href: "/audit", label: "Audit Log", icon: FileClock },
     { href: "/settings", label: "Settings", icon: Settings2 },
   ];
-  return <aside className="sidebar">
+  return <aside className={cn("sidebar", collapsed && "sidebar-collapsed")}>
     <div className="brand-row">
       <div className="brand-mark"><GitBranch size={19} strokeWidth={2.3} /></div>
       <div><div className="brand-name">DRIFTLINE</div><div className="brand-sub">DECISION INTELLIGENCE</div></div>
+      <button className="sidebar-collapse-button" onClick={onToggleCollapse} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>{collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}</button>
       <button className="mobile-menu-button" onClick={onToggleMenu} aria-label="Toggle navigation"><Menu size={18} /></button>
     </div>
     <div className="workspace-switcher">
@@ -413,8 +428,9 @@ function Topbar({ currentPath, onMobileMenu }: { currentPath: string; onMobileMe
 
 function Shell({ children, state, currentPath }: { children: ReactNode; state: AppState; currentPath: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   return <div className={cn("app-shell", mobileOpen && "mobile-nav-open")}>
-    <Sidebar currentPath={currentPath} failureMode={state.failureMode} onToggleMenu={() => setMobileOpen((value) => !value)} />
+    <Sidebar currentPath={currentPath} failureMode={state.failureMode} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} onToggleMenu={() => setMobileOpen((value) => !value)} />
     <div className="app-main"><Topbar currentPath={currentPath} onMobileMenu={() => setMobileOpen(true)} /><main className="content-area">{children}</main></div>
     {mobileOpen && <button className="mobile-overlay" onClick={() => setMobileOpen(false)} aria-label="Close navigation" />}
   </div>;
@@ -439,6 +455,30 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   return <label className="filter-select"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronRight size={14} className="select-chevron" /></label>;
 }
 
+function SignalActivityChart() {
+  const [series, setSeries] = useState(seedSignalSeries);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSeries((current) => {
+        const last = current[current.length - 1];
+        const nextTime = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+        return [...current.slice(1), {
+          time: nextTime,
+          block: Math.max(1, Math.min(12, last.block + Math.round(Math.random() * 4 - 2))),
+          review: Math.max(2, Math.min(16, last.review + Math.round(Math.random() * 4 - 2))),
+          approve: Math.max(5, Math.min(20, last.approve + Math.round(Math.random() * 4 - 2))),
+        }];
+      });
+    }, 4200);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <section className="signal-chart-card">
+    <div className="signal-chart-header"><div><div className="section-kicker"><Activity size={14} /> SIGNAL ACTIVITY / LIVE</div><h2>Drift volume by risk bucket</h2></div><div className="chart-legend"><span><i className="legend-dot legend-block" /> block</span><span><i className="legend-dot legend-review" /> review</span><span><i className="legend-dot legend-approve" /> approve</span></div></div>
+    <div className="chart-viewport"><ResponsiveContainer width="100%" height="100%"><AreaChart data={series} margin={{ top: 8, right: 10, left: -22, bottom: 0 }}><defs><linearGradient id="blockFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef6a63" stopOpacity={0.34} /><stop offset="100%" stopColor="#ef6a63" stopOpacity={0} /></linearGradient><linearGradient id="reviewFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#eab763" stopOpacity={0.28} /><stop offset="100%" stopColor="#eab763" stopOpacity={0} /></linearGradient><linearGradient id="approveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#57d9a3" stopOpacity={0.25} /><stop offset="100%" stopColor="#57d9a3" stopOpacity={0} /></linearGradient></defs><CartesianGrid vertical={false} stroke="rgba(163,183,201,.1)" /><XAxis dataKey="time" tick={{ fill: "#6f808b", fontSize: 9 }} tickLine={false} axisLine={false} /><YAxis tick={{ fill: "#6f808b", fontSize: 9 }} tickLine={false} axisLine={false} width={32} /><Tooltip contentStyle={{ background: "#14202a", border: "1px solid rgba(163,183,201,.2)", borderRadius: 8, color: "#f2f5f7", fontSize: 11 }} labelStyle={{ color: "#91a2ad" }} /><Area type="monotone" dataKey="approve" stroke="#57d9a3" fill="url(#approveFill)" strokeWidth={2} animationDuration={550} /><Area type="monotone" dataKey="review" stroke="#eab763" fill="url(#reviewFill)" strokeWidth={2} animationDuration={550} /><Area type="monotone" dataKey="block" stroke="#ef6a63" fill="url(#blockFill)" strokeWidth={2} animationDuration={550} /></AreaChart></ResponsiveContainer></div>
+    <div className="chart-footnote"><span><span className="live-dot" /> auto-refreshing every 4s</span><span>Source: replay fixture · 24h rolling view</span></div>
+  </section>;
+}
+
 function FeedPage({ state }: { state: AppState }) {
   const [riskFilter, setRiskFilter] = useState("All risk levels");
   const [serviceFilter, setServiceFilter] = useState("All services");
@@ -450,6 +490,7 @@ function FeedPage({ state }: { state: AppState }) {
       <div className="page-title-actions"><button className="button button-secondary"><RefreshCw size={15} /> Refresh scan</button><span className="sync-note"><span className="live-dot" /> synced 2m ago</span></div>
     </PageTitle>
     <SummaryStrip events={state.events} audits={state.audits} />
+    <SignalActivityChart />
     <div className="filter-row">
       <div className="filter-group"><Filter size={15} className="filter-leading" /><span className="filter-label">FILTER BY</span><FilterSelect label="Risk" value={riskFilter} options={["All risk levels", "Block", "Review", "Approve"]} onChange={setRiskFilter} /><FilterSelect label="Service" value={serviceFilter} options={["All services", "S3", "IAM", "EC2", "RDS"]} onChange={setServiceFilter} /></div>
       <div className="filter-group filter-group-right"><span className="filter-label">SORT</span><FilterSelect label="Sort" value={sort} options={["Newest first", "Highest risk first"]} onChange={setSort} /></div>
