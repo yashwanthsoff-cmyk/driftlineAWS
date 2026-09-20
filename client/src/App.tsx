@@ -375,7 +375,7 @@ function RiskIcon({ risk }: { risk: RiskLevel }) {
 
 function Sidebar({ currentPath, failureMode, collapsed, onToggleCollapse, onToggleMenu }: { currentPath: string; failureMode: boolean; collapsed: boolean; onToggleCollapse: () => void; onToggleMenu: () => void }) {
   const items = [
-    { href: "/", label: "Drift Feed", icon: Activity, count: 3 },
+    { href: "/console", label: "Drift Feed", icon: Activity, count: 3 },
     { href: "/audit", label: "Audit Log", icon: FileClock },
     { href: "/settings", label: "Settings", icon: Settings2 },
   ];
@@ -395,7 +395,7 @@ function Sidebar({ currentPath, failureMode, collapsed, onToggleCollapse, onTogg
       <div className="nav-label">OPERATIONS</div>
       {items.map((item) => {
         const Icon = item.icon;
-        const active = item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href);
+        const active = currentPath === item.href || (item.href === "/console" && currentPath === "/");
         return <Link key={item.href} href={item.href} className={cn("nav-item", active && "nav-item-active")}>
           <Icon size={17} strokeWidth={active ? 2.2 : 1.8} /><span>{item.label}</span>{item.count && <span className="nav-count">{item.count}</span>}
         </Link>;
@@ -418,7 +418,7 @@ function MoreHorizontalIcon() {
 }
 
 function Topbar({ currentPath, onMobileMenu }: { currentPath: string; onMobileMenu: () => void }) {
-  const label = currentPath === "/" ? "Drift Feed" : currentPath.startsWith("/events/") ? "Risk Detail" : currentPath === "/audit" ? "Audit Log" : "Settings";
+  const label = currentPath === "/console" || currentPath === "/" ? "Drift Feed" : currentPath.startsWith("/events/") ? "Risk Detail" : currentPath === "/audit" ? "Audit Log" : "Settings";
   return <header className="topbar">
     <button className="topbar-menu" onClick={onMobileMenu} aria-label="Open navigation"><Menu size={18} /></button>
     <div className="breadcrumbs"><span>platform-prod</span><ChevronRight size={14} /><strong>{label}</strong></div>
@@ -523,7 +523,7 @@ function RiskDetailPage({ state, eventId, setDecision, setOutcome }: { state: Ap
   const recommendedDecision: Decision = event.risk_level === "block" ? "block" : event.risk_level === "review" ? "approve_with_conditions" : "approve";
   return <>
     {state.failureMode && <InlineFailureBanner />}
-    <button className="back-link" onClick={() => setLocation("/")}><ArrowLeft size={15} /> Back to drift feed</button>
+    <button className="back-link" onClick={() => setLocation("/console")}><ArrowLeft size={15} /> Back to drift feed</button>
     <div className="detail-title-row"><div><div className="eyebrow-row"><span className="live-dot" />RISK DETAIL / {event.service}</div><h1>{event.resource}</h1><p className="detail-subtitle">{event.summary}</p></div><div className="detail-title-meta"><span className="event-id">{event.id}</span><span className="source-chip"><GitBranch size={13} /> {event.evidence_source === "aws_config" ? "AWS Config" : "Replay fixture"}</span></div></div>
     <section className="decision-panel panel-glow">
       <div className="decision-panel-header"><div><div className="panel-kicker"><Sparkles size={14} /> EXPLAINABLE DECISION</div><h2>Deployment risk assessment</h2></div><StatusBadge risk={event.risk_level} /></div>
@@ -570,6 +570,31 @@ function AuditPage({ state }: { state: AppState }) {
   </>;
 }
 
+function LandingPage() {
+  const floatingCards = [
+    { className: "landing-card-state", label: "EXPECTED STATE", title: "S3 bucket policy", meta: "guardrail / aligned", icon: ShieldCheck, tone: "mint" },
+    { className: "landing-card-actor", label: "ACTOR CONFIDENCE", title: "Approved CI/CD", meta: "aws configuration drift", icon: CheckCircle2, tone: "blue" },
+    { className: "landing-card-decision", label: "DECISION", title: "Review required", meta: "P1 · evidence ceiling", icon: AlertTriangle, tone: "red" },
+    { className: "landing-card-window", label: "CHANGE WINDOW", title: "02:00 UTC", meta: "protected window", icon: Clock3, tone: "green" },
+    { className: "landing-card-signal", label: "DRIFT SIGNAL", title: "IAM role policy", meta: "principal broadened", icon: LockKeyhole, tone: "amber" },
+    { className: "landing-card-match", label: "HISTORICAL MATCH", title: "3 similar outcomes", meta: "2 approved · 1 review", icon: History, tone: "gold" },
+    { className: "landing-card-remediation", label: "REMEDIATION", title: "Human approval", meta: "pushback ready", icon: ArrowUpRight, tone: "teal" },
+    { className: "landing-card-audit", label: "AUDIT TRAIL", title: "Evidence attached", meta: "exportable snapshot", icon: FileText, tone: "purple" },
+  ];
+  return <div className="landing-page">
+    <header className="landing-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><nav><a href="#why-driftline">Why Driftline</a><a href="#how-it-works">How it works</a><Link href="/console">Console</Link></nav><div className="landing-header-actions"><Link href="/settings" className="landing-signin">Sign in</Link><Link href="/console" className="landing-open-console">Open console <ArrowUpRight size={15} /></Link></div></header>
+    <main className="landing-hero" id="why-driftline">
+      <div className="landing-orbit landing-orbit-outer" /><div className="landing-orbit landing-orbit-inner" />
+      {floatingCards.map((card) => { const Icon = card.icon; return <div key={card.label} className={cn("landing-card", card.className, `landing-card-${card.tone}`)}><div className="landing-card-label">{card.label}<span><Icon size={13} /></span></div><strong>{card.title}</strong><small>{card.meta}</small></div>; })}
+      <div className="landing-kicker"><span className="landing-kicker-dot" /> AWS CONFIGURATION DRIFT GOVERNANCE</div>
+      <h1>Infrastructure<br />changes.<br /><em>Clearly</em><br /><em>accounted</em><br /><em>for.</em></h1>
+      <p className="landing-deck">Driftline connects what changed with who changed it, why it matters, and what your team should do next.</p>
+      <div className="landing-hero-actions"><Link href="/console" className="landing-primary-cta">Open the console <ArrowUpRight size={17} /></Link><a href="#how-it-works" className="landing-secondary-cta">Explore capabilities <ArrowUpRight size={15} /></a></div>
+    </main>
+    <section className="landing-capabilities" id="how-it-works"><div><span>01</span><h2>From drift signal<br />to accountable action.</h2></div><p>Every configuration change gets a clear risk assessment, the evidence behind it, and a memory of what happened last time.</p><Link href="/console" className="landing-text-link">See the live signal feed <ArrowUpRight size={15} /></Link></section>
+  </div>;
+}
+
 function SettingsPage({ state, setState }: { state: AppState; setState: (updater: (current: AppState) => AppState) => void }) {
   return <>
     <PageTitle eyebrow="CONTROL PLANE / LOCAL CONFIG" title="Settings" description="Tune the replay experience without changing the evidence model." />
@@ -587,7 +612,7 @@ function GenericErrorFallback() {
 
 function Router({ state, setState, setDecision, setOutcome }: { state: AppState; setState: (updater: (current: AppState) => AppState) => void; setDecision: (id: string, decision: Decision) => void; setOutcome: (id: string, outcome: Outcome) => void }) {
   const [location] = useLocation();
-  if (location === "/") return <FeedPage state={state} />;
+  if (location === "/console") return <FeedPage state={state} />;
   if (location === "/audit") return <AuditPage state={state} />;
   if (location === "/settings") return <SettingsPage state={state} setState={setState} />;
   if (location.startsWith("/events/")) return <RiskDetailPage state={state} eventId={location.split("/")[2] ?? ""} setDecision={setDecision} setOutcome={setOutcome} />;
@@ -597,7 +622,7 @@ function Router({ state, setState, setDecision, setOutcome }: { state: AppState;
 function App() {
   const { state, setState, setDecision, setOutcome } = useDriftlineState();
   const [location] = useLocation();
-  return <ErrorBoundary><Shell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></Shell><Toaster theme="dark" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
+  return <ErrorBoundary>{location === "/" ? <LandingPage /> : <Shell state={state} currentPath={location}><Router state={state} setState={setState} setDecision={setDecision} setOutcome={setOutcome} /></Shell>}<Toaster theme="dark" position="bottom-right" toastOptions={{ className: "drift-toast" }} /></ErrorBoundary>;
 }
 
 export default App;
