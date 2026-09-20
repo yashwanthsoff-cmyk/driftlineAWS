@@ -381,8 +381,7 @@ function Sidebar({ currentPath, failureMode, collapsed, onToggleCollapse, onTogg
   ];
   return <aside className={cn("sidebar", collapsed && "sidebar-collapsed")}>
     <div className="brand-row">
-      <div className="brand-mark"><GitBranch size={19} strokeWidth={2.3} /></div>
-      <div><div className="brand-name">DRIFTLINE</div><div className="brand-sub">DECISION INTELLIGENCE</div></div>
+      <Link href="/" className="brand-home-link" aria-label="Back to Driftline home"><div className="brand-mark"><GitBranch size={19} strokeWidth={2.3} /></div><div><div className="brand-name">DRIFTLINE</div><div className="brand-sub">DECISION INTELLIGENCE</div></div></Link>
       <button className="sidebar-collapse-button" onClick={onToggleCollapse} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>{collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}</button>
       <button className="mobile-menu-button" onClick={onToggleMenu} aria-label="Toggle navigation"><Menu size={18} /></button>
     </div>

@@ -810,3 +810,14 @@ html { scroll-behavior: smooth; }
 .diagram-interactive:hover .diagram-detail, .diagram-interactive:focus-visible .diagram-detail { opacity: 1; transform: translate(-50%, 0); }
 @keyframes live-data-blink { 0%, 100% { opacity: .45; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
 @media (prefers-reduced-motion: reduce) { .diagram-live-dot { animation: none; } .diagram-interactive { transition: none; } .diagram-detail { transition: none; } }
+
+/* Shared home navigation on console brand. */
+.brand-home-link { display: inline-flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; border-radius: 8px; transition: opacity .18s ease, transform .18s ease; }
+.brand-home-link:hover { opacity: .84; transform: translateX(2px); }
+.brand-home-link:focus-visible { outline: 2px solid #24bd28; outline-offset: 4px; }
+.sidebar-collapsed .brand-home-link > div:nth-child(2) { display: none; }
+.sidebar-collapsed .brand-home-link { justify-content: center; }
+@media (max-width: 820px) {
+  .sidebar-collapsed .brand-home-link > div:nth-child(2) { display: block; }
+  .sidebar-collapsed .brand-home-link { justify-content: flex-start; }
+}
