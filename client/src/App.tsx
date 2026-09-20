@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -570,6 +570,19 @@ function AuditPage({ state }: { state: AppState }) {
   </>;
 }
 
+function Reveal({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.14 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref} id={id} className={cn("scroll-reveal", visible && "scroll-reveal-visible", className)}>{children}</div>;
+}
+
 function LandingPage() {
   const floatingCards = [
     { className: "landing-card-state", label: "EXPECTED STATE", title: "S3 bucket policy", meta: "guardrail / aligned", icon: ShieldCheck, tone: "mint" },
@@ -583,7 +596,7 @@ function LandingPage() {
   ];
   return <div className="landing-page">
     <header className="landing-header"><Link href="/" className="landing-brand"><span className="landing-brand-orbit" /><span>Driftline</span></Link><nav><a href="#why-driftline">Why Driftline</a><a href="#how-it-works">How it works</a><Link href="/console">Console</Link></nav><div className="landing-header-actions"><Link href="/settings" className="landing-signin">Sign in</Link><Link href="/console" className="landing-open-console">Open console <ArrowUpRight size={15} /></Link></div></header>
-    <main className="landing-hero" id="why-driftline">
+    <main className="landing-hero" id="landing-top">
       <div className="landing-orbit landing-orbit-outer" /><div className="landing-orbit landing-orbit-inner" />
       <div className="landing-card-orbit">{floatingCards.map((card) => { const Icon = card.icon; return <div key={card.label} className={cn("landing-card", card.className, `landing-card-${card.tone}`)}><div className="landing-card-label">{card.label}<span><Icon size={13} /></span></div><strong>{card.title}</strong><small>{card.meta}</small></div>; })}</div>
       <div className="landing-kicker"><span className="landing-kicker-dot" /> AWS CONFIGURATION DRIFT GOVERNANCE</div>
@@ -591,7 +604,9 @@ function LandingPage() {
       <p className="landing-deck">Driftline connects what changed with who changed it, why it matters, and what your team should do next.</p>
       <div className="landing-hero-actions"><Link href="/console" className="landing-primary-cta">Open the console <ArrowUpRight size={17} /></Link><a href="#how-it-works" className="landing-secondary-cta">Explore capabilities <ArrowUpRight size={15} /></a></div>
     </main>
-    <section className="landing-capabilities" id="how-it-works"><div><span>01</span><h2>From drift signal<br />to accountable action.</h2></div><p>Every configuration change gets a clear risk assessment, the evidence behind it, and a memory of what happened last time.</p><Link href="/console" className="landing-text-link">See the live signal feed <ArrowUpRight size={15} /></Link></section>
+    <Reveal className="landing-editorial-section landing-why" id="why-driftline"><div className="landing-editorial-index">01 / WHY DRIFTLINE</div><div className="landing-editorial-copy"><h2>Context is the<br /><em>control plane.</em></h2><p>Most drift tools stop at “something changed.” Driftline connects the resource, actor, intent, evidence, and historical outcome so the next action is clear before the next deploy.</p><Link href="/console" className="landing-text-link">Explore the live signal feed <ArrowUpRight size={15} /></Link></div><div className="landing-proof-grid"><div><strong>01</strong><span>what changed</span></div><div><strong>02</strong><span>who changed it</span></div><div><strong>03</strong><span>why it matters</span></div><div><strong>04</strong><span>what to do next</span></div></div></Reveal>
+    <Reveal className="landing-editorial-section landing-how" id="how-it-works"><div className="landing-editorial-index">02 / HOW IT WORKS</div><div className="landing-editorial-copy"><h2>From drift signal<br />to <em>accountable action.</em></h2><p>Signals move through a calm, deterministic sequence: correlate the change, score the risk, recommend the response, then remember the outcome.</p></div><div className="landing-process"><div className="landing-process-step"><span>01</span><div><strong>Correlate</strong><p>Join AWS Config, CloudTrail, IaC, and deployment context.</p></div></div><div className="landing-process-line" /><div className="landing-process-step"><span>02</span><div><strong>Explain</strong><p>Show the evidence and the historical matches behind the score.</p></div></div><div className="landing-process-line" /><div className="landing-process-step"><span>03</span><div><strong>Decide</strong><p>Approve, condition, or block with an exportable audit trail.</p></div></div></div><Link href="/console" className="landing-primary-cta landing-process-cta">Open the console <ArrowUpRight size={17} /></Link></Reveal>
+    <Reveal className="landing-capabilities" id="capabilities"><div><span>03 / OPERATING MODEL</span><h2>One memory layer<br />for every change.</h2></div><p>Every decision becomes part of a growing operational memory, making the next risk faster to understand and easier to act on.</p><Link href="/audit" className="landing-text-link">View the evidence trail <ArrowUpRight size={15} /></Link></Reveal>
   </div>;
 }
 

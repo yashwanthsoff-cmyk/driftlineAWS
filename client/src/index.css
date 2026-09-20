@@ -709,3 +709,52 @@ code, pre, .resource-name, .event-id, .pattern-key, .json-header, .source-card, 
 .unified-console .failure-banner { background: #fffaf0; border-color: rgba(180,135,48,.3); color: #886a33; border-radius: 0; }
 .unified-console .not-found h1, .unified-console .crash-screen h1 { color: #111311; }
 .unified-console .not-found p, .unified-console .crash-screen p { color: #737d73; }
+
+/* Editorial scroll transitions and shared card interactions. */
+html { scroll-behavior: smooth; }
+.scroll-reveal { opacity: 0; transform: translateY(24px); transition: opacity .72s cubic-bezier(.23,1,.32,1), transform .72s cubic-bezier(.23,1,.32,1); }
+.scroll-reveal-visible { opacity: 1; transform: translateY(0); }
+.landing-editorial-section { position: relative; min-height: 560px; padding: 110px 12%; border-top: 1px solid rgba(16,18,16,.14); background: #f1f5ed; }
+.landing-editorial-index { color: #6c776d; font: 10px "JetBrains Mono", monospace; letter-spacing: .06em; }
+.landing-editorial-copy { max-width: 710px; margin: 64px 0 0 14%; }
+.landing-editorial-copy h2 { margin: 0; color: #101210; font-size: clamp(45px, 6.2vw, 94px); font-weight: 520; line-height: .9; letter-spacing: -.08em; }
+.landing-editorial-copy h2 em { color: #19bd1a; font-style: normal; }
+.landing-editorial-copy p { max-width: 365px; margin: 30px 0 20px; color: #6f786f; font-size: 14px; line-height: 1.55; }
+.landing-proof-grid { display: grid; grid-template-columns: repeat(4, 1fr); max-width: 710px; margin: 70px 0 0 14%; border-top: 1px solid rgba(16,18,16,.16); }
+.landing-proof-grid div { display: flex; flex-direction: column; gap: 12px; padding: 18px 15px 0 0; border-right: 1px solid rgba(16,18,16,.12); }
+.landing-proof-grid div:not(:first-child) { padding-left: 15px; }
+.landing-proof-grid strong { color: #101210; font-size: 26px; font-weight: 500; letter-spacing: -.05em; }
+.landing-proof-grid span { color: #7b857a; font: 9px "JetBrains Mono", monospace; text-transform: uppercase; }
+.landing-how { background: #e8f0e7; }
+.landing-how .landing-editorial-copy { margin-top: 54px; }
+.landing-how .landing-editorial-copy p { max-width: 390px; }
+.landing-process { display: grid; grid-template-columns: 1fr 70px 1fr 70px 1fr; align-items: start; max-width: 1000px; margin: 74px 0 0 14%; }
+.landing-process-step { display: grid; grid-template-columns: 30px 1fr; gap: 13px; }
+.landing-process-step > span { color: #5f865f; font: 10px "JetBrains Mono", monospace; }
+.landing-process-step strong { color: #101210; font-size: 18px; font-weight: 540; letter-spacing: -.03em; }
+.landing-process-step p { margin: 10px 0 0; color: #6d796d; font-size: 12px; line-height: 1.45; }
+.landing-process-line { height: 1px; margin-top: 7px; background: rgba(16,18,16,.25); }
+.landing-process-cta { margin: 54px 0 0 14%; }
+.landing-capabilities { display: grid; grid-template-columns: 1.15fr .95fr auto; gap: 40px; align-items: end; min-height: 390px; }
+.landing-capabilities h2 { margin-top: 26px; }
+.landing-capabilities p { max-width: 290px; color: #6f786f; font-size: 13px; line-height: 1.5; }
+.unified-console .summary-strip, .unified-console .signal-chart-card, .unified-console .event-table-card, .unified-console .audit-table-card, .unified-console .panel, .unified-console .decision-panel, .unified-console .audit-summary-card, .unified-console .setting-row, .unified-console .settings-side, .unified-console .iam-panel { transition: transform .24s cubic-bezier(.23,1,.32,1), box-shadow .24s ease, border-color .24s ease, background .24s ease; }
+.unified-console .summary-strip:hover, .unified-console .signal-chart-card:hover, .unified-console .panel:hover, .unified-console .decision-panel:hover, .unified-console .settings-side:hover, .unified-console .iam-panel:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(45,76,48,.08); border-color: rgba(46,150,57,.25); }
+.unified-console .audit-summary-card:hover, .unified-console .setting-row:hover { transform: translateY(-2px); background: rgba(255,255,255,.9); box-shadow: 0 9px 22px rgba(45,76,48,.06); }
+.unified-console .event-row, .unified-console .audit-record-main { transition: background .2s ease, transform .2s ease, padding-left .2s ease; }
+.unified-console .event-row:hover { transform: translateX(4px); background: rgba(255,255,255,.85); }
+.unified-console .audit-record-main:hover { transform: translateX(3px); }
+.unified-console .risk-statement, .unified-console .recommendation-card, .unified-console .match-card, .unified-console .evidence-json { transition: transform .22s ease, box-shadow .22s ease; }
+.unified-console .risk-statement:hover, .unified-console .recommendation-card:hover, .unified-console .match-card:hover, .unified-console .evidence-json:hover { transform: translateY(-2px); box-shadow: 0 9px 22px rgba(45,76,48,.06); }
+@media (max-width: 760px) {
+  .landing-editorial-section { min-height: 0; padding: 70px 22px; }
+  .landing-editorial-copy, .landing-proof-grid, .landing-process, .landing-process-cta { margin-left: 0; }
+  .landing-editorial-copy { margin-top: 42px; }
+  .landing-editorial-copy h2 { font-size: 53px; }
+  .landing-proof-grid { grid-template-columns: 1fr 1fr; margin-top: 48px; }
+  .landing-proof-grid div:nth-child(3) { border-top: 1px solid rgba(16,18,16,.12); padding-top: 18px; }
+  .landing-process { display: flex; flex-direction: column; gap: 19px; margin-top: 50px; }
+  .landing-process-line { width: 1px; height: 26px; margin: 0 0 0 14px; }
+  .landing-process-cta { margin-top: 39px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .scroll-reveal { opacity: 1; transform: none; transition: none; } }
